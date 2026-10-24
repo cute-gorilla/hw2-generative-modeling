@@ -17,7 +17,10 @@ def get_fid(gen, dataset_name, dataset_resolution, z_dimension, batch_size, num_
     # Hint: Refer to diffusion/inference.py
     # Note: The output must be in the range [0, 255]!
     ##################################################################
-    gen_fn = None
+    gen_fn = lambda z: gen.sample_given_z(
+        z.reshape(z.shape[0], 3, dataset_resolution, dataset_resolution),
+        (z.shape[0], 3, dataset_resolution, dataset_resolution)
+    ) * 255
 
     ##################################################################
     #                          END OF YOUR CODE                      #
