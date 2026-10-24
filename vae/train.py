@@ -18,7 +18,9 @@ def ae_loss(model, x):
     ##################################################################
     # TODO 2.2: Fill in MSE loss between x and its reconstruction.
     ##################################################################
-    loss = None
+    latent = model.encoder(x)
+    reconst = model.decoder(latent)
+    loss = F.mse_loss(x, reconst, reduction='sum') / x.shape[0]
     ##################################################################
     #                          END OF YOUR CODE                      #
     ##################################################################
@@ -41,6 +43,13 @@ def vae_loss(model, x, beta = 1):
     total_loss = None
     recon_loss = None
     kl_loss = None
+    mu, log_std = model.encoder(x)
+    std = torch.exp(log_std)
+    z = mu + std * torch.randn_like(std)
+    reconst = model.decoder(z)
+    recon_loss = F.mse_loss(x, reconst, reduction='sum') / x.shape[0]
+    kl_loss = 0.5 * (mu**2 + std**2 - 1 - 2*log_std).sum() / x.shape[0]
+    total_loss = recon_loss + kl_loss
     ##################################################################
     #                          END OF YOUR CODE                      #
     ##################################################################
@@ -58,7 +67,7 @@ def linear_beta_scheduler(max_epochs=None, target_val = 1):
     # linearly from 0 at epoch 0 to target_val at epoch max_epochs.
     ##################################################################
     def _helper(epoch):
-        pass
+        return target_val * epoch / max_epochs
     ##################################################################
     #                          END OF YOUR CODE                      #
     ##################################################################
