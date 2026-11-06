@@ -27,8 +27,8 @@ class UpSampleConv2D(torch.jit.ScriptModule):
         # (batch, channel, height*upscale_factor, width*upscale_factor)
         # 3. Apply convolution and return output
         ##################################################################
-        x = torch.repeat_interleave(x, repeats=self.upscale_factor**2, dim=1)
-        x = torch.nn.PixelShuffle(self.upscale_factor)(x)
+        x = torch.repeat_interleave(x, repeats=int(self.upscale_factor**2), dim=1)
+        x = F.pixel_shuffle(x, int(self.upscale_factor))
         return self.conv(x)
         ##################################################################
         #                          END OF YOUR CODE                      #
@@ -58,10 +58,10 @@ class DownSampleConv2D(torch.jit.ScriptModule):
         # and return the output
         ##################################################################
         r = self.downscale_ratio
-        x = torch.nn.PixelUnshuffle(r)(x)
+        x = F.pixel_unshuffle(x, r)
         
         B, C, H, W = x.shape
-        x = x.view(B, C // (r**2), (r**2), H, W)
+        x = x.view(B, C // (r*r), (r*r), H, W)
         x = x.permute(2, 0, 1, 3, 4)
         x = x.mean(dim=0)
         return self.conv(x)
@@ -289,8 +289,8 @@ class Generator(torch.jit.ScriptModule):
         # layer into an image with the appropriate size!
         ##################################################################
         x = self.dense(z)
-        B, _, _, _ = x.shape
-        x.reshape(B, 128, 4, 4)
+        B, _ = x.shape
+        x = x.reshape(B, 128, 4, 4)
         return self.layers(x)
         ##################################################################
         #                          END OF YOUR CODE                      #
@@ -302,8 +302,8 @@ class Generator(torch.jit.ScriptModule):
         # TODO 1.1: Generate n_samples latents and forward through the
         # network.
         ##################################################################
-        z = torch.randn(n_samples, 128)
-        return self.layers(z)
+        z = torch.randn(n_samples, 128, device=self.dense.weight.device)
+        return self.forward_given_samples(z)
         ##################################################################
         #                          END OF YOUR CODE                      #
         ##################################################################

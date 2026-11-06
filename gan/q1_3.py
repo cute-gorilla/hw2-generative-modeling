@@ -29,7 +29,7 @@ def compute_generator_loss(discrim_fake):
     ##################################################################
     # TODO 1.3: Implement GAN loss for the generator.
     ##################################################################
-    loss = F.binary_cross_entropy_with_logits(discrim_fake, torch.zeros_like(discrim_fake))
+    loss = F.binary_cross_entropy_with_logits(discrim_fake, torch.ones_like(discrim_fake))
     ##################################################################
     #                          END OF YOUR CODE                      #
     ##################################################################

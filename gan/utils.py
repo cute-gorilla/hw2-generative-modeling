@@ -2,6 +2,7 @@ import argparse
 import torch
 from cleanfid import fid
 from matplotlib import pyplot as plt
+import torchvision
 
 
 def save_plot(x, y, xlabel, ylabel, title, filename):
@@ -40,7 +41,14 @@ def interpolate_latent_space(gen, path):
     # 3. Save out an image holding all 100 samples.
     # Use torchvision.utils.save_image to save out the visualization.
     ##################################################################
-    pass
+    device = gen.dense.weight.device
+    z = torch.zeros(100, 128, device=device)
+    val = torch.linspace(-1, 1, 10, device=device)
+    z[:, 0] = val.repeat(10)
+    z[:, 1] = val.repeat_interleave(10)
+    samples = gen.forward_given_samples(z)
+    samples = (samples / 2 + 0.5).clamp(0, 1)
+    torchvision.utils.save_image(samples, path, nrow=10)
     ##################################################################
     #                          END OF YOUR CODE                      #
     ##################################################################
