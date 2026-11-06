@@ -49,7 +49,7 @@ def vae_loss(model, x, beta = 1):
     reconst = model.decoder(z)
     recon_loss = F.mse_loss(x, reconst, reduction='sum') / x.shape[0]
     kl_loss = 0.5 * (mu**2 + std**2 - 1 - 2*log_std).sum() / x.shape[0]
-    total_loss = recon_loss + kl_loss
+    total_loss = recon_loss + beta*kl_loss
     ##################################################################
     #                          END OF YOUR CODE                      #
     ##################################################################
